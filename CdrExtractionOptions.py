@@ -1,6 +1,8 @@
 # configuration file for CdrExtraction 
 from collections import OrderedDict
 
+# parameters are optimized for single cell analysis 
+
 # link to cd-hit-est binary
 CD_HIT_EST = '/usr/local/bin/cd-hit-est'
 # command line options for cd-hit-est
@@ -9,9 +11,9 @@ CD_HIT_EST_OPTIONS = ['-M','0','-T','0','-l','50']
 MAX_READS_FOR_CONSENSUS = 1000 
 # minimum reads for a sequencing cluster 
 MINIMUM_READS_FOR_CLUSTER = 5
-# minimum length of possible TCR read
+# minimum length of possible TCR reads
 MINIMUM_LENGTH_OF_TCR_READ = 150
-# maxmimum number of possible TCR reads to be submitted to IMGT
+# maxmimum number of possible TCR sequences to be submitted to IMGT
 MAXIMUM_NUMBER_OF_READS_PER_WELL = 5
 
 # databases for blast as provided in subdirectory ./references - absolute path needs to be set

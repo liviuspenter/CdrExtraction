@@ -3,7 +3,7 @@ import CdrExtractionOptions
 
 import copy
 import numpy
-
+import tempfile
 from Bio import SeqIO
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Blast import NCBIXML
@@ -34,6 +34,30 @@ def CytokineOutput(wellname, cytokine_list):
 	for k in cytokine_list:
 		output += str(cytokine_list[k]) + '\t'
 	return output[:-1] + '\n'
+
+# generate file without cytokine reads and return temporary file plus cytokine list
+def FileWithoutCytokines(filename):
+       	# generate temporary file
+	tmp_file = tempfile.NamedTemporaryFile(delete=False)
+	cytokine_list = copy.deepcopy(CdrExtractionOptions.CYTOKINE_LIST)
+        
+        # read in all reads from sequence file 
+        sequences = ConsensusClusters.ReadSequences(filename)
+        
+        # go through all reads
+        for s in sequences:
+            # check if read contains cytokine and count it
+            cytokine = CytokineExtraction(sequences[s], CdrExtractionOptions.PATH_TO_CYTOKINE_DB)
+            if cytokine != '':
+                cytokine_list[cytokine]+=1
+            # if it does not contain cytokine, write to file
+            else:   
+                tmp_file.write('>' + s + '\n' + sequences[s] + '\n')
+        
+        # close temporary file
+       	tmp_file.close()
+ 
+        return tmp_file.name, cytokine_list
 
 # generate input for IMGT HighV-Quest
 # >wellname:index:number of reads
@@ -72,3 +96,21 @@ def ParseWell(filename):
 		p.append(possible_TCR_reads[i])
 
 	return p, cytokine_list
+
+# purge barcodes and primers of alpha read 
+def PurgeConsensusReadAlpha(s):
+    start = s.upper().find('CCAGGGTTTTCCCAGTCACGAC') + 22
+    end = s.upper().find('GTCACTGGATTTAGAGTCTCTCAG')
+    if (start == -1 or end == -1):
+        return s
+
+    return s[start:end]
+
+# purge barcodes and primers of beta read
+def PurgeConsensusReadBeta(s):
+    start = s.upper().find('CCAGGGTTTTCCCAGTCACGAC') + 22
+    end = s.upper().find('GAGCCATCAGAAGCAGAGATCTC') 
+    if (start == -1 or end == -1):
+        return s
+
+    return s[start:end]
